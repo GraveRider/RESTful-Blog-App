@@ -1,0 +1,29 @@
+* {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+i.icon {
+    font-size: 2em;
+}
+
+.container.main {
+    margin-top: 7em;
+}
+
+i.chevron {
+    padding-top: 0.2em;
+}
+
+div.description p {
+    text-align: justify;
+}
+
+div.item img {
+    width: 100%;
+}
+
+#delete {
+    display: inline;
+}

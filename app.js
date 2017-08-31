@@ -1,5 +1,9 @@
 var express = require("express");
 var app = express();
+var flash = require("connect-flash");
+var session = require('express-session');
+var cookieParser = require('cookie-parser');
+var blogRoutes = require("./routes/blogs");
 var expressSanitizer = require("express-sanitizer");
 var methodOverride = require("method-override");
 var mongoose = require("mongoose");
@@ -13,94 +17,17 @@ app.use(express.static("public"));
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(expressSanitizer());
 app.use(methodOverride("_method"));
+app.use(cookieParser("secret"));
+app.use(session({cookie: { maxAge: 60000 }}));
+app.use(flash());
 
-//MONGOOSE/MODEL CONFIG
-var blogSchema = mongoose.Schema({
-    title: String,
-    image: String,
-    body: String,
-    created: {type: Date, default: Date.now}
+app.use(function (req, res, next) {
+    res.locals.error = req.flash("error");
+    next();
 });
-
-var Blog = mongoose.model("Blog", blogSchema);
-
 //RESTFUL ROUTES
-app.get("/", function(req, res) {
-    res.redirect("blogs");
-});
+app.use(blogRoutes);
 
-app.get("/blogs", function(req, res) {
-    Blog.find({}, function(err, blogs) {
-        if (err) {
-            console.log("ERROR!");
-        }
-        else {
-            res.render("index", {blogs: blogs});
-        }
-    });
-});
-
-app.get("/blogs/new", function(req, res) {
-    res.render("new");
-});
-
-app.post("/blogs", function(req, res) {
-    req.body.blog.body = req.sanitize(req.body.blog.body);
-    Blog.create(req.body.blog, function(err, newBlog) {
-       if (err) {
-           res.render("new");
-       }
-       else {
-           res.redirect("/blogs");
-       }
-    });
-});
-
-app.get("/blogs/:id", function(req, res) {
-    Blog.findById(req.params.id, function(err, foundBlog) {
-        if (err) {
-            res.redirect("/blogs");
-        }
-        else {
-            res.render("show", {blog: foundBlog});
-        }
-    });
-});
-
-app.get("/blogs/:id/edit", function(req, res) {
-    Blog.findById(req.params.id, function(err, foundBlog) {
-        if (err) {
-            res.redirect("/blogs");
-        }
-        else {
-            res.render("edit", {blog: foundBlog});
-        }
-    });
-});
-
-app.put("/blogs/:id", function(req, res) {
-    req.body.blog.body = req.sanitize(req.body.blog.body);
-    Blog.findByIdAndUpdate(req.params.id, req.body.blog, function(err, updatedBlog) {
-        if (err) {
-            res.redirect("/blogs");
-        }
-        else {
-            res.redirect("/blogs/" + req.params.id);
-        }
-    });
-});
-
-app.delete("/blogs/:id", function(req, res) {
-    Blog.findByIdAndRemove(req.params.id, function(err) {
-        if (err) {
-            res.redirect("/blogs");
-        }
-        else {
-            res.redirect("/blogs");
-        }
-    });
-});
-
-app.listen(3000, function() {
+app.listen(3000, function () {
     console.log("Server is running");
 });

@@ -12,3 +12,9 @@
             <a href="/blogs/new" class="item">New Post</a>
         </div>
     </div>
+
+    <div id="alert-message" class="ui main text container">
+        <% if(error && error.length > 0) { %>
+        <div class="ui red message"><%= error %></div>
+        <% }%>
+    </div>
